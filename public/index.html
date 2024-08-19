@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/light.css"
+    />
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/shoelace-autoloader.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.4/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
+    <title>CA 系统</title>
+  </head>
+  <body>
+    <main x-data="app">
+      <header>
+        <h3>CA 系统</h3>
+      </header>
+      <p>
+        <sl-button size="large" variant="text" @click="download('root_cert')">
+          <sl-icon slot="prefix" name="person-vcard"></sl-icon>
+          <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
+          下载 CA 根证书
+        </sl-button>
+      </p>
+      <sl-card class="certificate-card">
+        <div slot="header" class="certificate-card-header">签发 IP 证书</div>
+        <form class="certificate-form">
+          <sl-input
+            x-model="ip"
+            class="ip-address-input"
+            name="name"
+            label="IP(v4) 1"
+            required
+            pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+          ></sl-input>
+
+          <sl-button
+            type="button"
+            variant="primary"
+            class="submit-btn"
+            @click="submit()"
+            :disabled="signed"
+          >
+            <sl-icon name="floppy2"></sl-icon>
+            开始签发
+          </sl-button>
+        </form>
+      </sl-card>
+      <p x-show="siginKey">
+        <sl-button size="large" variant="text" @click="download('sigin_key')">
+          <sl-icon slot="prefix" name="key"></sl-icon>
+          <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
+          点击下载已签发证书的私钥
+        </sl-button>
+      </p>
+      <p x-show="siginCert">
+        <sl-button size="large" variant="text" @click="download('sigin_cert')">
+          <sl-icon slot="prefix" name="person-vcard"></sl-icon>
+          <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
+          点击下载已签发证书
+        </sl-button>
+      </p>
+    </main>
+    <style>
+      main {
+        width: 500px;
+        margin: 0 auto;
+      }
+      .certificate-card {
+        margin: 1rem auto;
+        width: 500px;
+      }
+      .certificate-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .submit-btn {
+        margin: 1rem auto;
+        width: 100px;
+        float: right;
+      }
+      /* 在加载完成前隐藏内容 */
+      body {
+        visibility: hidden;
+      }
+
+      /* 在加载完成后显示内容 */
+      body.loaded {
+        visibility: visible;
+      }
+    </style>
+    <script>
+      window.addEventListener('load', function () {
+        document.body.classList.add('loaded');
+      });
+
+      const namePrefix = (() => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        return `${year}_${month}_${day}_`;
+      })();
+
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('app', () => ({
+          ip: '',
+          submit() {
+            axios.post('/api/cert/sign', { ip: this.ip }).then((res) => {
+              const { data } = res.data;
+              const { key, cert, ca } = data;
+
+              this.rootCert = ca;
+              this.siginKey = key;
+              this.siginCert = cert;
+            });
+          },
+          get signed() {
+            return !!this.siginKey && !!this.siginCert;
+          },
+          rootCert: null,
+          siginKey: null,
+          siginCert: null,
+          async download(type) {
+            switch (type) {
+              case 'root_cert':
+                if (!this.rootCert) {
+                  const res = await axios.get('/api/cert/root');
+                  const { data } = res.data;
+                  const { cert } = data;
+                  this.rootCert = cert;
+                }
+                exportCertificate(this.rootCert, 'root_cert.crt');
+                break;
+              case 'sigin_key':
+                exportCertificate(this.siginKey, namePrefix + 'sigin_key.key');
+                break;
+              case 'sigin_cert':
+                exportCertificate(
+                  this.siginCert,
+                  namePrefix + 'sigin_cert.crt',
+                );
+                break;
+            }
+          },
+        }));
+      });
+
+      function exportCertificate(certString, filename) {
+        const blob = new Blob([certString], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    </script>
+  </body>
+</html>
