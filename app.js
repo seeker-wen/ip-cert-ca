@@ -1,7 +1,8 @@
-
-
+import https from 'https';
 import express from 'express';
 import bodyParser from 'body-parser';
+import fs from 'fs-extra';
+
 import { errorMiddleware } from './error.js';
 import { signCert, getRootCert } from './src/cert.js';
 import config from "./config.js";
@@ -34,7 +35,12 @@ app.post('/api/cert/sign', async (req, res, next) => {
 });
 
 app.use(errorMiddleware());
-// 启动服务器，监听 3000 端口
-app.listen(config.server.port, () => {
+
+const sslOptions = {
+  key: fs.readFileSync('./server.key'),
+  cert: fs.readFileSync('./server.crt')
+};
+
+https.createServer(sslOptions, app).listen(config.server.port, () => {
   console.log('Server is running on port ' + config.server.port);
 });

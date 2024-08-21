@@ -1,12 +1,10 @@
 import fs from 'fs-extra';
-import selfsigned from 'selfsigned';
+import forge from 'node-forge';
 import config from "../config.js";
 
 // 生成根证书
 async function generateRootCertificate({
-  key,
-  cert,
-  days,
+  years,
   commonName,
   countryName,
   stateOrProvinceName,
@@ -22,38 +20,52 @@ async function generateRootCertificate({
     { name: 'organizationName', value: organizationName },
     { name: 'organizationalUnitName', value: organizationalUnitName },
   ];
+  const keys = forge.pki.rsa.generateKeyPair(2048);
+  const cert = forge.pki.createCertificate();
 
-  const pems = selfsigned.generate(rootAttrs, {
-    keySize: 4096,
-    days,
-    algorithm: 'sha256',
-    extensions: [
-      { name: 'basicConstraints', cA: true }, // 设为CA
-      { name: 'keyUsage', keyCertSign: true, cRLSign: true }, // 允许签署证书和CRL
-      { name: 'subjectKeyIdentifier' }
-    ],
-    clientCertificate: false
-  });
+  cert.publicKey = keys.publicKey;
 
-  // 保存根证书的私钥和证书
-  await fs.outputFile(key, pems.private);
-  await fs.outputFile(cert, pems.cert);
+  cert.serialNumber = '01';
+  cert.validity.notBefore = new Date();
+  cert.validity.notAfter = new Date();
+  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + years);
+  cert.setSubject(rootAttrs);
+  cert.setIssuer(rootAttrs);
+
+  cert.setExtensions([
+    { name: 'basicConstraints', cA: true },
+    { name: 'keyUsage', keyCertSign: true, digitalSignature: true, cRLSign: true },
+    { name: 'subjectKeyIdentifier' }
+  ]);
+
+  cert.sign(keys.privateKey, forge.md.sha256.create());
+
+  // 将证书和私钥保存为文件
+  const pemCert = forge.pki.certificateToPem(cert);
+  const pemPrivateKey = forge.pki.privateKeyToPem(keys.privateKey);
+
+  return {
+    pemCert,
+    pemPrivateKey
+  }
 }
 
 
 async function start() {
   if (!fs.existsSync(config.cert.rootCA.key) || !fs.existsSync(config.cert.rootCA.cert)) {
-    await generateRootCertificate({
-      key: config.cert.rootCA.key,
-      cert: config.cert.rootCA.cert,
-      days: config.cert.rootCA.days,
+    const { pemCert, pemPrivateKey } = await generateRootCertificate({
+      years: config.cert.rootCA.years,
       commonName: config.cert.rootCA.commonName,
       countryName: config.cert.rootCA.countryName,
       stateOrProvinceName: config.cert.rootCA.stateOrProvinceName,
       localityName: config.cert.rootCA.localityName,
       organizationName: config.cert.rootCA.organizationName,
       organizationalUnitName: config.cert.rootCA.organizationalUnitName,
-    })
+    });
+
+    // 保存根证书的私钥和证书
+    await fs.outputFile(config.cert.rootCA.key, pemPrivateKey);
+    await fs.outputFile(config.cert.rootCA.cert, pemCert);
   }
 
   await import('../app.js');
