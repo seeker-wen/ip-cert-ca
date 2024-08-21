@@ -1,10 +1,10 @@
 const env = process.env;
 
 export const server = {
-  port: 3000,
+  port: env.SERVER_PORT || 9696,
   ssl: {
-    key: 'key.pem',
-    cert: 'cert.pem'
+    key: './server.key',
+    cert: './server.crt'
   },
 }
 
