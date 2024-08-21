@@ -1,7 +1,6 @@
 import https from 'https';
 import express from 'express';
 import bodyParser from 'body-parser';
-import fs from 'fs-extra';
 
 import { errorMiddleware } from './error.js';
 import { signCert, getRootCert } from './src/cert.js';

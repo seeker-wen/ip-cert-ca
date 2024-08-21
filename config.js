@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 const env = process.env;
 
 export const server = {
-  port: env.SERVER_PORT || 9696,
+  port: +env.SERVER_PORT || 9999,
   ssl: {
     key: fs.readFileSync('./server.key'),
     cert: fs.readFileSync('./server.crt'),
