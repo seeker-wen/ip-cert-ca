@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import fs from 'fs-extra';
 const env = process.env;
 
@@ -13,7 +14,7 @@ export const cert = {
   rootCA: {
     keyfile: './var/root_ca.key',
     certfile: './var/root_ca.crt',
-    years: env.ROOT_CA_YEARS || 100,
+    years: +env.ROOT_CA_YEARS || 100,
     commonName: env.ROOT_CA_COMMON_NAME || "OmegaCARoot",
     countryName: env.ROOT_CA_COUNTRY_NAME || "CN",
     stateOrProvinceName: env.ROOT_CA_STATE_OR_PROVINCENAME || "HuBei",
@@ -22,8 +23,7 @@ export const cert = {
     organizationalUnitName: env.ROOT_CA_ORGANIZATIONAL_UNIT_NAME || "OmegaCA",
   },
   signCert: {
-    years: env.SIGN_CERT_YEARS || 10,
-    commonName: env.SIGN_CERT_COMMON_NAME || "OmegaCA",
+    years: +env.SIGN_CERT_YEARS || 10,
     countryName: env.SIGN_CERT_COUNTRY_NAME || "CN",
     stateOrProvinceName: env.SIGN_CERT_STATE_OR_PROVINCENAME || "HuBei",
     localityName: env.SIGN_CERT_LOCALITY_NAME || "WuHan",
