@@ -9,9 +9,9 @@ export function errorMiddleware(option) {
     console.error(err.stack);
 
     if (err instanceof CustomError) {
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ message: err.message });
     } else {
-      res.status(500).json({ error: '内部服务器错误' });
+      res.status(500).json({ message: '内部服务器错误' });
     }
   }
 }

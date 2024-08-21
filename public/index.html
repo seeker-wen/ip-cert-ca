@@ -25,7 +25,11 @@
         <h3>CA 系统</h3>
       </header>
       <p>
-        <sl-button size="large" variant="text" @click="download('root_cert')">
+        <sl-button
+          size="large"
+          variant="text"
+          @click="evDownloadClick('root_cert')"
+        >
           <sl-icon slot="prefix" name="person-vcard"></sl-icon>
           <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
           下载 CA 根证书
@@ -33,21 +37,21 @@
       </p>
       <sl-card class="certificate-card">
         <div slot="header" class="certificate-card-header">签发 IP 证书</div>
-        <form class="certificate-form">
+        <form class="certificate-form" @submit="evSubmitClick(event)">
           <sl-input
             x-model="ip"
             class="ip-address-input"
             name="name"
             label="IP(v4) 1"
             required
+            autocomplete="off"
             pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
           ></sl-input>
 
           <sl-button
-            type="button"
+            type="submit"
             variant="primary"
             class="submit-btn"
-            @click="submit()"
             :disabled="signed"
           >
             <sl-icon name="floppy2"></sl-icon>
@@ -56,14 +60,22 @@
         </form>
       </sl-card>
       <p x-show="siginKey">
-        <sl-button size="large" variant="text" @click="download('sigin_key')">
+        <sl-button
+          size="large"
+          variant="text"
+          @click="evDownloadClick('sigin_key')"
+        >
           <sl-icon slot="prefix" name="key"></sl-icon>
           <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
           点击下载已签发证书的私钥
         </sl-button>
       </p>
       <p x-show="siginCert">
-        <sl-button size="large" variant="text" @click="download('sigin_cert')">
+        <sl-button
+          size="large"
+          variant="text"
+          @click="evDownloadClick('sigin_cert')"
+        >
           <sl-icon slot="prefix" name="person-vcard"></sl-icon>
           <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
           点击下载已签发证书
@@ -104,6 +116,42 @@
         document.body.classList.add('loaded');
       });
 
+      async function notify(
+        message,
+        variant = 'danger',
+        icon = 'info-circle',
+        duration = 3000,
+      ) {
+        function escapeHtml(html) {
+          const div = document.createElement('div');
+          div.textContent = html;
+          return div.innerHTML;
+        }
+
+        const alert = Object.assign(document.createElement('sl-alert'), {
+          variant,
+          closable: true,
+          duration: duration,
+          innerHTML: `
+            <sl-icon name="${icon}" slot="icon"></sl-icon>
+            ${escapeHtml(message)}
+          `,
+        });
+        document.body.append(alert);
+
+        await customElements.whenDefined('sl-alert');
+        return alert.toast();
+      }
+      // axios 错误处理
+      axios.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          const { message } = error.response.data;
+          notify(message);
+          return Promise.reject(error);
+        },
+      );
+
       const namePrefix = (() => {
         const now = new Date();
         const year = now.getFullYear();
@@ -115,7 +163,9 @@
       document.addEventListener('alpine:init', () => {
         Alpine.data('app', () => ({
           ip: '',
-          submit() {
+          evSubmitClick(event) {
+            event.preventDefault();
+
             axios.post('/api/cert/sign', { ip: this.ip }).then((res) => {
               const { data } = res.data;
               const { key, cert, ca } = data;
@@ -131,7 +181,7 @@
           rootCert: null,
           siginKey: null,
           siginCert: null,
-          async download(type) {
+          async evDownloadClick(type) {
             switch (type) {
               case 'root_cert':
                 if (!this.rootCert) {
@@ -160,7 +210,7 @@
         const blob = new Blob([certString], { type: 'text/plain' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = filename;
+        link.evDownloadClick = filename;
 
         link.style.display = 'none';
         document.body.appendChild(link);
