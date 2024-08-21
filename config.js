@@ -1,18 +1,18 @@
+import fs from 'fs-extra';
 const env = process.env;
 
 export const server = {
   port: env.SERVER_PORT || 9696,
   ssl: {
-    key: './server.key',
-    cert: './server.crt'
+    key: fs.readFileSync('./server.key'),
+    cert: fs.readFileSync('./server.crt'),
   },
 }
 
 export const cert = {
-  store: './var/store.json',
   rootCA: {
-    key: './var/root_ca.key',
-    cert: './var/root_ca.crt',
+    keyfile: './var/root_ca.key',
+    certfile: './var/root_ca.crt',
     years: env.ROOT_CA_YEARS || 100,
     commonName: env.ROOT_CA_COMMON_NAME || "OmegaCARoot",
     countryName: env.ROOT_CA_COUNTRY_NAME || "CN",

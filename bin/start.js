@@ -52,7 +52,7 @@ async function generateRootCertificate({
 
 
 async function start() {
-  if (!fs.existsSync(config.cert.rootCA.key) || !fs.existsSync(config.cert.rootCA.cert)) {
+  if (!fs.existsSync(config.cert.rootCA.keyfile) || !fs.existsSync(config.cert.rootCA.certfile)) {
     const { pemCert, pemPrivateKey } = await generateRootCertificate({
       years: config.cert.rootCA.years,
       commonName: config.cert.rootCA.commonName,
@@ -64,8 +64,8 @@ async function start() {
     });
 
     // 保存根证书的私钥和证书
-    await fs.outputFile(config.cert.rootCA.key, pemPrivateKey);
-    await fs.outputFile(config.cert.rootCA.cert, pemCert);
+    await fs.outputFile(config.cert.rootCA.keyfile, pemPrivateKey);
+    await fs.outputFile(config.cert.rootCA.certfile, pemCert);
   }
 
   await import('../app.js');

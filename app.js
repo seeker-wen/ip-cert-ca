@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 
 import { errorMiddleware } from './error.js';
 import { signCert, getRootCert } from './src/cert.js';
-import config from "./config.js";
+import { server } from "./config.js";
 
 const app = express();
 app.use(express.static('public'));
@@ -36,11 +36,6 @@ app.post('/api/cert/sign', async (req, res, next) => {
 
 app.use(errorMiddleware());
 
-const sslOptions = {
-  key: fs.readFileSync('./server.key'),
-  cert: fs.readFileSync('./server.crt')
-};
-
-https.createServer(sslOptions, app).listen(config.server.port, () => {
-  console.log('Server is running on port ' + config.server.port);
+https.createServer(server.ssl, app).listen(server.port, () => {
+  console.log('Server is running on port ' + server.port);
 });
