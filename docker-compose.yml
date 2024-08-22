@@ -1,0 +1,26 @@
+version: '3'
+services:
+  omega-ca:
+    image: 10.12.135.233/front-frame/omega-ca:1.0.0
+    restart: always
+    # 容器对外暴露的端口号3005，该端口号应与服务的端口号保持一致
+    ports:
+      - 9999:9999
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    environment:
+      SERVICE_PORT: 3005
+      SIGN_CERT_YEARS: 20
+    networks:
+      - omega-ca
+networks:
+  omega-ca:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.87.0.0/16
