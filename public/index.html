@@ -17,6 +17,7 @@
     ></script>
     <script src="//cdn.jsdelivr.net/npm/axios@1.7.4/dist/axios.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
+    <script type="module" src="index.js"></script>
     <title>CA 系统</title>
   </head>
   <body>
@@ -42,7 +43,7 @@
             x-model="ip"
             class="ip-address-input"
             name="name"
-            label="IP(v4) 1"
+            label="IP(v4)"
             required
             autocomplete="off"
             pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
@@ -81,6 +82,9 @@
           点击下载已签发证书
         </sl-button>
       </p>
+      <sl-details summary="查看说明">
+        <omega-ca-readme></omega-ca-readme>
+      </sl-details>
     </main>
     <style>
       main {
