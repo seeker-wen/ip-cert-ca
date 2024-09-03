@@ -1,5 +1,10 @@
 import 'dotenv/config'
 import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const env = process.env;
 
 export const server = {
@@ -12,8 +17,8 @@ export const server = {
 
 export const cert = {
   rootCA: {
-    keyfile: './var/root_ca.key',
-    certfile: './var/root_ca.crt',
+    keyfile: path.join(__dirname, './var/root_ca.key'),
+    certfile: path.join(__dirname, './var/root_ca.crt'),
     years: +env.ROOT_CA_YEARS || 100,
     commonName: env.ROOT_CA_COMMON_NAME || "OmegaCARoot",
     countryName: env.ROOT_CA_COUNTRY_NAME || "CN",

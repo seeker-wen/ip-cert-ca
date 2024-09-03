@@ -61,8 +61,8 @@ export async function signCert({ ip }) {
   if (!ip.match(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)) {
     throw new CustomError("ip 不符合规则，仅支持IPv4。示例 10.12.137.14");
   }
-  const rootKey = await fs.readFile(cert.rootCA.key, 'utf8');
-  const rootCert = await fs.readFile(cert.rootCA.cert, 'utf8');
+  const rootKey = await fs.readFile(cert.rootCA.keyfile, 'utf8');
+  const rootCert = await fs.readFile(cert.rootCA.certfile, 'utf8');
 
   const ipCert = generateIpCertificate(
     {
@@ -87,7 +87,7 @@ export async function signCert({ ip }) {
 }
 
 export async function getRootCert() {
-  const rootCert = await fs.readFile(cert.rootCA.cert, 'utf8');
+  const rootCert = await fs.readFile(cert.rootCA.certfile, 'utf8');
   return {
     cert: rootCert
   }
