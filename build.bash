@@ -1,4 +1,4 @@
-version_tag="1.0.1"
+version_tag="1.0.2"
 repo_host="10.12.135.233"
 repo_name="front-frame/omega-ca"
 image_name_with_tag="$repo_host/$repo_name:$version_tag"
