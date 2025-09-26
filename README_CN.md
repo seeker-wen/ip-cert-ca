@@ -1,6 +1,6 @@
 # ip-cert-ca - 内网IP地址HTTPS证书管理系统
 
-**中文** | [English](README_EN.md)
+**中文** | [English](README.md)
 
 ## 项目简介
 
@@ -47,7 +47,7 @@ module.exports = {
 #### 方式三：从源码运行
 
 ```bash
-git clone https://github.com/your-repo/ip-cert-ca.git
+git clone https://github.com/seeker-wen/ip-cert-ca.git
 cd ip-cert-ca
 npm install
 npm run prod
