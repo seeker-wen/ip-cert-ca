@@ -83,7 +83,10 @@ async function ensureEnvFile() {
 
 // 检查并创建PM2配置文件示例
 async function ensurePM2ConfigExample() {
-  const pm2ConfigPath = path.join(process.cwd(), 'ecosystem.config.js.example');
+  const pm2ConfigPath = path.join(
+    process.cwd(),
+    'ecosystem.config.cjs.example',
+  );
 
   if (!fs.existsSync(pm2ConfigPath)) {
     const pm2ConfigContent = `module.exports = {
