@@ -8,107 +8,477 @@
     <script defer src="/libs/alpinejs.min.js"></script>
     <script src="/libs/axios.min.js"></script>
     <script src="/libs/forge.min.js"></script>
-    <script type="module" src="index.js"></script>
-    <title>CA 系统</title>
+    <title data-i18n="title">IP Cert CA</title>
   </head>
   <body>
     <main x-data="app">
-      <header>
-        <h3>CA 系统</h3>
+      <header class="page-header">
+        <div class="header-icon">
+          <sl-icon name="shield-check" style="font-size: 2.5rem; color: var(--sl-color-primary-600);"></sl-icon>
+        </div>
+        <h1 data-i18n="app.title">IP Cert CA</h1>
+        <p class="page-subtitle" data-i18n="app.subtitle">IP 证书颁发机构</p>
       </header>
-      <p>
-        <sl-button
-          size="large"
-          variant="text"
-          @click="evDownloadClick('root_cert')"
-        >
-          <sl-icon slot="prefix" name="person-vcard"></sl-icon>
-          <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
-          下载 CA 根证书
-        </sl-button>
-      </p>
-      <sl-card class="certificate-card">
-        <div slot="header" class="certificate-card-header">签发 IP 证书</div>
-        <form class="certificate-form" @submit="evSubmitClick(event)">
-          <sl-input
-            x-model="ip"
-            class="ip-address-input"
-            name="name"
-            label="IP(v4)"
-            required
-            autocomplete="off"
-            pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-          ></sl-input>
 
+      <!-- 核心功能区域 -->
+      <div class="main-actions">
+        <!-- 第一步：下载根证书 -->
+        <section class="action-card primary-card">
+          <div class="action-header">
+            <div class="step-number">1</div>
+            <div class="action-title">
+               <h2 data-i18n="sections.root_cert_title">下载根证书</h2>
+               <p class="action-desc" data-i18n="sections.root_cert_desc">首次使用需要安装根证书</p>
+             </div>
+          </div>
           <sl-button
-            type="submit"
+            size="large"
             variant="primary"
-            class="submit-btn"
-            :disabled="signed"
+            class="action-button"
+            @click="evDownloadClick('root_cert')"
           >
-            <sl-icon name="floppy2"></sl-icon>
-            开始签发
+            <sl-icon slot="prefix" name="download"></sl-icon>
+            <span data-i18n="buttons.download_root_cert">下载 CA 根证书</span>
           </sl-button>
-        </form>
-      </sl-card>
-      <p x-show="siginKey">
-        <sl-button
-          size="large"
-          variant="text"
-          @click="evDownloadClick('sigin_key')"
-        >
-          <sl-icon slot="prefix" name="key"></sl-icon>
-          <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
-          点击下载已签发证书的私钥
-        </sl-button>
-      </p>
-      <p x-show="siginCert">
-        <sl-button
-          size="large"
-          variant="text"
-          @click="evDownloadClick('sigin_cert')"
-        >
-          <sl-icon slot="prefix" name="person-vcard"></sl-icon>
-          <sl-icon slot="suffix" name="arrow-down-square"></sl-icon>
-          点击下载已签发证书
-        </sl-button>
-      </p>
-      <sl-details summary="查看说明">
-        <omega-ca-readme></omega-ca-readme>
-      </sl-details>
+        </section>
+
+        <!-- 第二步：签发证书 -->
+        <section class="action-card secondary-card">
+          <div class="action-header">
+            <div class="step-number">2</div>
+            <div class="action-title">
+               <h2 data-i18n="form.title">签发 IP 证书</h2>
+               <p class="action-desc" data-i18n="form.desc">为指定IP地址生成SSL证书</p>
+             </div>
+          </div>
+          <form class="certificate-form" @submit="evSubmitClick(event)">
+            <sl-input
+              x-model="ip"
+              class="ip-input"
+              name="name"
+              :label="$t('form.ip_label')"
+              placeholder="192.168.1.100"
+              required
+              autocomplete="off"
+              pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            >
+              <sl-icon slot="prefix" name="globe"></sl-icon>
+            </sl-input>
+            <sl-button
+              type="submit"
+              variant="success"
+              class="action-button"
+              :disabled="signed"
+              size="large"
+            >
+              <sl-icon slot="prefix" name="award"></sl-icon>
+              <span data-i18n="buttons.start_sign">开始签发</span>
+            </sl-button>
+          </form>
+        </section>
+      </div>
+
+      <section class="download-results success-section" x-show="siginKey || siginCert">
+        <div class="success-header">
+          <sl-icon name="check-circle" style="color: var(--sl-color-success-600); font-size: 2rem;"></sl-icon>
+          <h3 data-i18n="success.title">证书签发成功！</h3>
+        </div>
+        <div class="download-buttons">
+          <sl-button
+            x-show="siginKey"
+            size="large"
+            variant="default"
+            class="download-btn"
+            @click="evDownloadClick('sigin_key')"
+          >
+            <sl-icon slot="prefix" name="key"></sl-icon>
+            <span data-i18n="buttons.download_private_key">下载私钥文件</span>
+          </sl-button>
+          <sl-button
+            x-show="siginCert"
+            size="large"
+            variant="default"
+            class="download-btn"
+            @click="evDownloadClick('sigin_cert')"
+          >
+            <sl-icon slot="prefix" name="person-vcard"></sl-icon>
+            <span data-i18n="buttons.download_certificate">下载证书文件</span>
+          </sl-button>
+        </div>
+      </section>
+
+     
+    </main>
+      </section>
     </main>
     <style>
+      /* 现代简洁设计 */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #667eea 0%, #e2f1f5 100%);
+        color: #333;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
       main {
-        width: 500px;
+        max-width: 800px;
         margin: 0 auto;
+        padding: 20px;
       }
-      .certificate-card {
-        margin: 1rem auto;
-        width: 500px;
+
+      /* 页面头部 */
+      .page-header {
+        text-align: center;
+        padding: 40px 20px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        margin-bottom: 30px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
       }
-      .certificate-card-header {
+
+      .page-header h1 {
+        margin: 16px 0 8px 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 400;
+      }
+
+      /* 主要功能区域 */
+      .main-actions {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      }
+
+      .action-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 32px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .primary-card {
+        border-left: 4px solid #007aff;
+      }
+
+      .secondary-card {
+        border-left: 4px solid #34c759;
+      }
+
+      .action-header {
         display: flex;
-        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        display: flex;
         align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        flex-shrink: 0;
       }
-      .submit-btn {
-        margin: 1rem auto;
-        width: 100px;
-        float: right;
+
+      .action-title h2 {
+        margin: 0 0 8px 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1a1a1a;
       }
-      /* 在加载完成前隐藏内容 */
+
+      .action-desc {
+        margin: 0;
+        color: #666;
+        font-size: 0.95rem;
+      }
+
+      .action-button {
+        width: 100%;
+        --sl-color-primary-600: #007aff;
+        --sl-color-primary-700: #0056cc;
+        --sl-color-success-600: #34c759;
+        --sl-color-success-700: #30d158;
+        font-weight: 600;
+        border-radius: 12px;
+        height: 48px;
+        font-size: 1rem;
+      }
+
+      /* 表单样式 */
+      .certificate-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .ip-input {
+        --sl-input-border-color: #d1d5db;
+        --sl-input-border-color-focus: #007aff;
+        --sl-input-border-radius-medium: 12px;
+        --sl-input-height-large: 48px;
+        font-size: 1rem;
+      }
+
+      /* 成功区域 */
+      .success-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 32px;
+        margin-top: 24px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(52, 199, 89, 0.3);
+        animation: slideIn 0.5s ease-out;
+      }
+
+      .success-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .success-header h3 {
+        margin: 0;
+        color: #34c759;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .download-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .download-btn {
+        --sl-color-neutral-600: #6b7280;
+        --sl-color-neutral-700: #4b5563;
+        border-radius: 12px;
+        font-weight: 500;
+        min-width: 200px;
+      }
+
+      /* 动画效果 */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        main {
+          padding: 16px;
+        }
+
+        .main-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .page-header {
+          padding: 32px 20px;
+        }
+
+        .page-header h1 {
+          font-size: 2rem;
+        }
+
+        .action-card {
+          padding: 24px;
+        }
+
+        .download-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .download-btn {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+
+      /* 加载状态 */
       body {
         visibility: hidden;
       }
 
-      /* 在加载完成后显示内容 */
       body.loaded {
         visibility: visible;
       }
     </style>
     <script>
+      // 最简单的国际化系统
+      const i18n = {
+        // 语言包
+        messages: {
+          'zh-CN': {
+            title: 'IP 证书 CA',
+            app: {
+              title: 'IP Cert CA',
+              subtitle: 'IP 证书颁发',
+            },
+            info: {
+              ca_description: '安全可信的 IP 证书颁发服务，支持本地网络和内网环境',
+            },
+            sections: {
+              root_cert_title: '根证书下载',
+              root_cert_desc: '首次使用需要安装根证书',
+            },
+            buttons: {
+              download_root_cert: '下载 CA 根证书',
+              start_sign: '开始签发',
+              download_private_key: '下载私钥文件',
+              download_certificate: '下载证书文件',
+            },
+            form: {
+              title: '签发 IP 证书',
+              desc: '为指定IP地址生成SSL证书',
+              ip_label: 'IP(v4)',
+              ip_help: '请输入有效的 IPv4 地址，例如：192.168.1.100',
+            },
+            success: {
+              title: '证书签发成功！',
+              message: '您的 IP 证书已成功生成，请下载证书和私钥文件',
+            },
+            tips: {
+              root_cert_tip: '请先下载并安装根证书到系统信任存储中',
+              private_key_tip: '私钥文件请妥善保管，不要泄露',
+              certificate_tip: '证书文件可以配置到您的服务器中',
+            },
+            help: {
+              view_instructions: '查看说明',
+            },
+          },
+          en: {
+            title: 'IP Certificate CA',
+            app: {
+              title: 'IP Cert CA',
+              subtitle: 'IP Certificate Authority',
+            },
+            info: {
+              ca_description: 'Secure and trusted IP certificate issuance service for local and internal networks',
+            },
+            sections: {
+              root_cert_title: 'Root Certificate Download',
+              root_cert_desc: 'Install root certificate for first-time use',
+            },
+            buttons: {
+              download_root_cert: 'Download CA Root Certificate',
+              start_sign: 'Start Signing',
+              download_private_key: 'Download Private Key',
+              download_certificate: 'Download Certificate',
+            },
+            form: {
+              title: 'Issue IP Certificate',
+              desc: 'Generate SSL certificate for specified IP address',
+              ip_label: 'IP(v4)',
+              ip_help: 'Please enter a valid IPv4 address, e.g.: 192.168.1.100',
+            },
+            success: {
+              title: 'Certificate Issued Successfully!',
+              message: 'Your IP certificate has been successfully generated, please download the certificate and private key files',
+            },
+            tips: {
+              root_cert_tip: 'Please download and install the root certificate to your system trust store first',
+              private_key_tip: 'Please keep the private key file secure and do not leak it',
+              certificate_tip: 'The certificate file can be configured on your server',
+            },
+            help: {
+              view_instructions: 'View Instructions',
+            },
+          },
+        },
+
+        // 当前语言
+        currentLang: 'zh-CN',
+
+        // 初始化
+        init() {
+          // 检测系统语言
+          const systemLang = navigator.language || navigator.userLanguage;
+          this.currentLang = systemLang.startsWith('zh') ? 'zh-CN' : 'en';
+
+          // 更新HTML lang属性
+          document.documentElement.lang = this.currentLang;
+
+          // 应用翻译
+          this.applyTranslations();
+        },
+
+        // 获取翻译文本
+        t(key) {
+          const keys = key.split('.');
+          let value = this.messages[this.currentLang];
+
+          for (const k of keys) {
+            value = value?.[k];
+          }
+
+          return value || key;
+        },
+
+        // 应用翻译
+        applyTranslations() {
+          // 处理data-i18n属性的元素
+          document.querySelectorAll('[data-i18n]').forEach((el) => {
+            const key = el.getAttribute('data-i18n');
+            const translation = this.t(key);
+
+            if (el.tagName === 'TITLE') {
+              el.textContent = translation;
+            } else {
+              el.textContent = translation;
+            }
+          });
+        },
+      };
+
+      // 全局$t函数
+      window.$t = (key) => i18n.t(key);
+
       window.addEventListener('load', function () {
         document.body.classList.add('loaded');
+        // 初始化国际化
+        i18n.init();
       });
 
       async function notify(
@@ -158,6 +528,8 @@
       document.addEventListener('alpine:init', () => {
         Alpine.data('app', () => ({
           ip: '',
+          // 添加$t方法到Alpine组件
+          $t: (key) => window.$t(key),
           evSubmitClick(event) {
             event.preventDefault();
 

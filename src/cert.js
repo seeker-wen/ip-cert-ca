@@ -1,20 +1,22 @@
 import fs from 'fs-extra';
 import forge from 'node-forge';
 
-import { CustomError } from "../error.js";
-import { cert } from "../config.js";
-
+import { CustomError } from './error.js';
+import { cert } from './config.js';
 
 // 生成 IP 地址证书
-function generateIpCertificate({ rootPemCert, rootPemKey }, {
-  ip,
-  years,
-  countryName,
-  stateOrProvinceName,
-  localityName,
-  organizationName,
-  organizationalUnitName,
-} = {}) {
+function generateIpCertificate(
+  { rootPemCert, rootPemKey },
+  {
+    ip,
+    years,
+    countryName,
+    stateOrProvinceName,
+    localityName,
+    organizationName,
+    organizationalUnitName,
+  } = {},
+) {
   const rootCertificate = forge.pki.certificateFromPem(rootPemCert);
   const rootPrivateKey = forge.pki.privateKeyFromPem(rootPemKey);
 
@@ -26,7 +28,9 @@ function generateIpCertificate({ rootPemCert, rootPemKey }, {
   cert.serialNumber = new Date().getTime().toString(16);
   cert.validity.notBefore = new Date();
   cert.validity.notAfter = new Date();
-  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + years);
+  cert.validity.notAfter.setFullYear(
+    cert.validity.notBefore.getFullYear() + years,
+  );
 
   cert.setSubject([
     { name: 'commonName', value: ip },
@@ -41,7 +45,7 @@ function generateIpCertificate({ rootPemCert, rootPemKey }, {
   cert.setExtensions([
     { name: 'basicConstraints', cA: false },
     { name: 'keyUsage', digitalSignature: true, keyEncipherment: true },
-    { name: 'subjectAltName', altNames: [{ type: 7, ip: ip }] }
+    { name: 'subjectAltName', altNames: [{ type: 7, ip: ip }] },
   ]);
 
   cert.sign(rootPrivateKey, forge.md.sha256.create());
@@ -49,17 +53,21 @@ function generateIpCertificate({ rootPemCert, rootPemKey }, {
   return {
     rootPemCert,
     pemCert: forge.pki.certificateToPem(cert),
-    pemPrivateKey: forge.pki.privateKeyToPem(keys.privateKey)
+    pemPrivateKey: forge.pki.privateKeyToPem(keys.privateKey),
   };
 }
 
 export async function signCert({ ip }) {
   if (!ip) {
-    throw new CustomError("ip 不能为空");
+    throw new CustomError('ip 不能为空');
   }
 
-  if (!ip.match(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)) {
-    throw new CustomError("ip 不符合规则，仅支持IPv4。示例 10.12.137.14");
+  if (
+    !ip.match(
+      /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+    )
+  ) {
+    throw new CustomError('ip 不符合规则，仅支持IPv4。示例 10.12.137.14');
   }
   const rootKey = await fs.readFile(cert.rootCA.keyfile, 'utf8');
   const rootCert = await fs.readFile(cert.rootCA.certfile, 'utf8');
@@ -77,18 +85,19 @@ export async function signCert({ ip }) {
       localityName: cert.signCert.localityName,
       organizationName: cert.signCert.organizationName,
       organizationalUnitName: cert.signCert.organizationalUnitName,
-    });
+    },
+  );
 
   return {
     key: ipCert.pemPrivateKey,
     cert: ipCert.pemCert,
-    ca: rootCert
-  }
+    ca: rootCert,
+  };
 }
 
 export async function getRootCert() {
   const rootCert = await fs.readFile(cert.rootCA.certfile, 'utf8');
   return {
-    cert: rootCert
-  }
+    cert: rootCert,
+  };
 }

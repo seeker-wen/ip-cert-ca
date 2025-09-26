@@ -5,12 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon ./app.js",
-    "prod": "node ./bin/start.js",
-    "start": "node ./bin/start.js"
+    "prod": "pm2 start ./src/main.js --name ip-cert-ca",
+    "start": "node ./src/main.js"
   },
   "bin": {
-    "ip-cert-ca": "./bin/start.js"
+    "ip-cert-ca": "./src/main.js"
   },
   "keywords": [
     "certificate-authority",
@@ -36,9 +35,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "fs-extra": "^11.2.0",
-    "node": "^18.17.1",
     "node-forge": "^1.3.1",
-    "pm2": "^5.4.2"
+    "pm2": "^6.0.13"
   },
   "devDependencies": {
     "nodemon": "^3.1.4",

@@ -14,7 +14,10 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-      SERVICE_PORT: 9999
+      # 服务器HOST
+      SERVER_HOST: 0.0.0.0
+      # 服务器端口
+      SERVER_PORT: 9999
       SIGN_CERT_YEARS: 20
     networks:
       - ip-cert-ca

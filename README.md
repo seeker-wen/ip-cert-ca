@@ -9,47 +9,43 @@ ip-cert-ca 是一个轻量级的证书颁发机构(CA)系统，专门为内网�
 ### 安装和运行
 
 #### 方式一：使用 npx 直接运行（推荐）
+
 ```bash
 npx ip-cert-ca
 ```
 
-#### 方式二：全局安装
-```bash
-npm install -g ip-cert-ca
-ip-cert-ca
+#### 方式二：生产环境部署（使用 PM2）
+
+创建 `ecosystem.config.js` 配置文件：
+
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'ip-cert-ca',
+      script: 'npx',
+      args: 'ip-cert-ca',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'production',
+      },
+      error_file: './logs/err.log',
+      out_file: './logs/out.log',
+      log_file: './logs/combined.log',
+      time: true,
+    },
+  ],
+};
 ```
 
-#### 方式三：本地开发
+然后使用 PM2 启动：
+
 ```bash
-# 克隆项目
-git clone <repository-url>
-cd ip-cert-ca
-
-# 安装依赖
-npm install
-
-# 开发模式运行
-npm run dev
-
-# 生产模式运行
-npm start
+pm2 start ecosystem.config.js
 ```
-
-#### 方式四：Docker 部署
-```bash
-# 使用 docker-compose
-docker-compose up -d
-
-# 或者直接使用 Docker
-docker build -t ip-cert-ca .
-docker run -p 9999:9999 ip-cert-ca
-```
-
-### 访问系统
-
-启动成功后，访问：`https://localhost:9999`
-
-**注意**：首次访问会提示证书不安全，这是正常现象。请先下载并安装根证书。
 
 ## 功能特性
 
@@ -63,11 +59,13 @@ docker run -p 9999:9999 ip-cert-ca
 ## API 接口
 
 ### 获取根证书
+
 ```http
 GET /api/cert/root
 ```
 
 ### 签发IP证书
+
 ```http
 POST /api/cert/sign
 Content-Type: application/json
@@ -97,6 +95,15 @@ Content-Type: application/json
 - **定义**：根证书是一张特殊的证书，用于信任其他证书。
 - **生成**：系统会自动生成一个根证书，并允许用户下载安装。
 - **安装**：用户需要将根证书安装在他们的设备上（如电脑或移动设备）。
+
+### ⚠️ 安全警告 根证书私钥的重要性
+
+**根证书私钥 (`root_ca.key`) 是整个证书体系的核心**：
+
+- 🔐 **绝对保密**：任何人获得此私钥都可以签发被您系统信任的证书
+- 🚫 **不可泄露**：一旦泄露，攻击者可以伪造任何域名/IP的证书
+- 💾 **安全备份**：建议将私钥备份到安全的离线存储设备
+- 🔒 **访问控制**：确保只有授权人员可以访问此文件
 
 ### IP 证书
 
