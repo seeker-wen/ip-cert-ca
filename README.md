@@ -62,6 +62,42 @@ npm run prod
 - 🐳 Docker containerization support
 - ⚡ Lightweight with minimal resource usage
 
+## Configuration
+
+The system supports configuration through a `.env` file. Main configuration options include:
+
+### Server Configuration
+
+```env
+SERVER_HOST=0.0.0.0          # Server listening address (system will generate HTTPS certificate for this **IP domain** using root CA at startup)
+SERVER_PORT=9999             # Server port
+```
+
+### Root Certificate Configuration
+
+```env
+ROOT_CA_YEARS=100                           # Root certificate validity period (years)
+ROOT_CA_COMMON_NAME=IP-Cert-CA-Root         # Root certificate common name
+ROOT_CA_COUNTRY_NAME=CN                     # Root certificate country code
+ROOT_CA_STATE_OR_PROVINCENAME=HuBei         # Root certificate state/province
+ROOT_CA_LOCALITY_NAME=WuHan                 # Root certificate city
+ROOT_CA_ORGANIZATION_NAME=Ip-Cert-CA        # Root certificate organization name
+ROOT_CA_ORGANIZATIONAL_UNIT_NAME=Ip-Cert-CA # Root certificate organizational unit
+```
+
+### Issued Certificate Configuration
+
+```env
+SIGN_CERT_YEARS=10                           # Issued certificate validity period (years)
+SIGN_CERT_COUNTRY_NAME=CN                    # Issued certificate country code
+SIGN_CERT_STATE_OR_PROVINCENAME=HuBei        # Issued certificate state/province
+SIGN_CERT_LOCALITY_NAME=WuHan                # Issued certificate city
+SIGN_CERT_ORGANIZATION_NAME=Ip-Cert-CA       # Issued certificate organization name
+SIGN_CERT_ORGANIZATIONAL_UNIT_NAME=Ip-Cert-CA # Issued certificate organizational unit
+```
+
+> **Note**: On first run, the system will automatically create a `.env` file with default configuration. You can modify these configuration items as needed.
+
 ## API Endpoints
 
 ### Get Root Certificate

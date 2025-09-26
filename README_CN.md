@@ -62,6 +62,42 @@ npm run prod
 - 🐳 支持Docker容器化部署
 - ⚡ 轻量级，资源占用少
 
+## 配置说明
+
+系统支持通过 `.env` 文件进行配置，主要配置项包括：
+
+### 服务器配置
+
+```env
+SERVER_HOST=0.0.0.0          # 服务器监听地址（启动时会根据该IP域名和我们的根证书生成该系统HTTPS的证书）
+SERVER_PORT=9999             # 服务器端口
+```
+
+### 根证书配置
+
+```env
+ROOT_CA_YEARS=100                           # 根证书有效期（年）
+ROOT_CA_COMMON_NAME=IP-Cert-CA-Root         # 根证书通用名称
+ROOT_CA_COUNTRY_NAME=CN                     # 根证书国家代码
+ROOT_CA_STATE_OR_PROVINCENAME=HuBei         # 根证书省份
+ROOT_CA_LOCALITY_NAME=WuHan                 # 根证书城市
+ROOT_CA_ORGANIZATION_NAME=Ip-Cert-CA        # 根证书组织名称
+ROOT_CA_ORGANIZATIONAL_UNIT_NAME=Ip-Cert-CA # 根证书组织单位
+```
+
+### 签发证书配置
+
+```env
+SIGN_CERT_YEARS=10                           # 签发证书有效期（年）
+SIGN_CERT_COUNTRY_NAME=CN                    # 签发证书国家代码
+SIGN_CERT_STATE_OR_PROVINCENAME=HuBei        # 签发证书省份
+SIGN_CERT_LOCALITY_NAME=WuHan                # 签发证书城市
+SIGN_CERT_ORGANIZATION_NAME=Ip-Cert-CA       # 签发证书组织名称
+SIGN_CERT_ORGANIZATIONAL_UNIT_NAME=Ip-Cert-CA # 签发证书组织单位
+```
+
+> **注意**：首次运行时，系统会自动创建 `.env` 文件并使用默认配置。您可以根据需要修改这些配置项。
+
 ## API 接口
 
 ### 获取根证书

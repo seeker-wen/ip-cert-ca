@@ -1,6 +1,6 @@
 {
   "name": "ip-cert-ca",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A lightweight Certificate Authority for generating SSL certificates for IP addresses in intranet environments",
   "main": "index.js",
   "type": "module",
