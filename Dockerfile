@@ -20,4 +20,4 @@ RUN pm2 set pm2-logrotate:retain 5
 # 容器对外暴露的端口号，要和node项目配置的端口号一致
 EXPOSE 9999
 # 执行启动命令
-CMD ["pm2-runtime", "start", "--name", "plt-omega-ca","./bin/start.js"]
+CMD ["pm2-runtime", "start", "--name", "ip-cert-ca","./bin/start.js"]

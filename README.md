@@ -1,4 +1,81 @@
-# 内部 HTTPS 证书管理系统简介
+# ip-cert-ca - 内网IP地址HTTPS证书管理系统
+
+## 项目简介
+
+ip-cert-ca 是一个轻量级的证书颁发机构(CA)系统，专门为内网环境中的IP地址生成和管理SSL/TLS证书。该系统基于Node.js构建，使用node-forge库进行证书生成，提供简单易用的Web界面和API接口。
+
+## 快速开始
+
+### 安装和运行
+
+#### 方式一：使用 npx 直接运行（推荐）
+```bash
+npx ip-cert-ca
+```
+
+#### 方式二：全局安装
+```bash
+npm install -g ip-cert-ca
+ip-cert-ca
+```
+
+#### 方式三：本地开发
+```bash
+# 克隆项目
+git clone <repository-url>
+cd ip-cert-ca
+
+# 安装依赖
+npm install
+
+# 开发模式运行
+npm run dev
+
+# 生产模式运行
+npm start
+```
+
+#### 方式四：Docker 部署
+```bash
+# 使用 docker-compose
+docker-compose up -d
+
+# 或者直接使用 Docker
+docker build -t ip-cert-ca .
+docker run -p 9999:9999 ip-cert-ca
+```
+
+### 访问系统
+
+启动成功后，访问：`https://localhost:9999`
+
+**注意**：首次访问会提示证书不安全，这是正常现象。请先下载并安装根证书。
+
+## 功能特性
+
+- 🔐 自动生成根证书和私钥
+- 🌐 专门为IP地址签发SSL证书
+- 🚀 简单易用的Web界面
+- 📡 RESTful API接口
+- 🐳 支持Docker容器化部署
+- ⚡ 轻量级，资源占用少
+
+## API 接口
+
+### 获取根证书
+```http
+GET /api/cert/root
+```
+
+### 签发IP证书
+```http
+POST /api/cert/sign
+Content-Type: application/json
+
+{
+  "ip": "192.168.1.100"
+}
+```
 
 ## 目标读者
 

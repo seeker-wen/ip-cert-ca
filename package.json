@@ -1,14 +1,31 @@
 {
-  "name": "plt-omega-ca",
+  "name": "ip-cert-ca",
   "version": "1.0.0",
-  "description": "",
+  "description": "A lightweight Certificate Authority for generating SSL certificates for IP addresses in intranet environments",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon ./app.js",
-    "prod": "node ./bin/start.js"
+    "prod": "node ./bin/start.js",
+    "start": "node ./bin/start.js"
   },
-  "keywords": [],
+  "bin": {
+    "ip-cert-ca": "./bin/start.js"
+  },
+  "keywords": [
+    "certificate-authority",
+    "ssl-certificate",
+    "ip-certificate",
+    "intranet",
+    "https",
+    "ca",
+    "node-forge",
+    "internal-ca",
+    "private-ca",
+    "self-signed",
+    "certificate-management",
+    "enterprise"
+  ],
   "author": "",
   "license": "ISC",
   "engines": {

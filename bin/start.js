@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from 'fs-extra';
 import forge from 'node-forge';
 import config from "../config.js";

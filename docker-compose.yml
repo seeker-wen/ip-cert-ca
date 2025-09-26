@@ -1,9 +1,9 @@
 version: '3'
 services:
-  omega-ca:
-    image: 10.12.135.233/front-frame/omega-ca:1.0.0
+  ip-cert-ca:
+    image: ip-cert-ca:1.0.0
     restart: always
-    # 容器对外暴露的端口号3005，该端口号应与服务的端口号保持一致
+    # 容器对外暴露的端口号9999，该端口号应与服务的端口号保持一致
     ports:
       - 9999:9999
     deploy:
@@ -14,12 +14,12 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-      SERVICE_PORT: 3005
+      SERVICE_PORT: 9999
       SIGN_CERT_YEARS: 20
     networks:
-      - omega-ca
+      - ip-cert-ca
 networks:
-  omega-ca:
+  ip-cert-ca:
     driver: bridge
     ipam:
       config:
